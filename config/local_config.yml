@@ -1,0 +1,54 @@
+#:==================================================================
+#:==      CONFIGURATION FOR FAST, LOCAL DEVELOPMENT RUNS        :==
+#:==================================================================
+
+run_mode: "local"
+seed: 42
+
+
+
+# --- General Path Settings ---
+# These paths are now updated to match your local folder structure.
+input_paths:
+  # Corresponds to your sharadar_data_file_path
+  # Assumes FRED data is also in the Input Folder
+  fred_data: "Input Folder/FRED Data/"
+
+# Save all intermediate and final outputs to your "Output Folder"
+output_path: "Output Folder/"
+input_path: "Input Folder/"
+
+# --- Script-Specific Settings ---
+
+# For 3-process-Sharadar-data-DAILY.py
+0_download_sharadar_data:
+  output_folder: "0_Sharadar_Data"
+  MAX_RETRIES: 3
+  RETRY_WAIT_SECONDS: 60
+  TOTAL_DOWNLOAD_TIMEOUT_MINS: 30
+  CHECK_INTERVAL_MINS: 10
+  indicator_file_name: "SHARADAR_INDICATORS_2"
+  DOWNLOAD_DATA: true # Set to false to skip web scraping and downloading
+  UNZIP_DATA: true    # Set to false to skip unzipping files
+  RENAME_DATA: true   # Set to false to skip renaming and post-processing (Parquet/Excel)
+  CLEANUP_SOURCE_FILES: false  # Set to true to delete source .zip and .csv files after processing
+
+
+
+  # batch_size: 10 # Small batch size for quick processing
+  # # Use a small, predefined list of tickers for local testing
+  # quick_ticker_list: ["AAPL", "MSFT", "GOOG", "AMZN", "TSLA", "NVDA", "JPM",'HLFN', 'EMPIQ', 'INB1', 'STRM', 'FRC-PE', 'RRR', 'HBANL',
+  #      'ARI-PA', 'GLSHQ', 'BDSPY', 'KFII', 'LENZ', 'BOSC', 'JCLY', 'TLSA',
+  #      'SOFIW', 'AUST', 'CALP', 'OPBK', 'ADF.U', 'HRBN', 'YBTVQ', 'QDROW',
+  #      'ASPSW', 'PFBI', 'TIIAY', 'BDRL', 'NYRT', 'TMPMU', 'LEGT', 'REVHU',
+  #      'FFDB', 'AES-PC', 'NTLO', 'WPCA.U', 'JBI', 'EVAC.U', 'CCGWW',
+  #      'ZEUS', 'GIGGU', 'STNE', 'PTK.U', 'SUPR', 'PDCC1', 'MOVE1',
+  #      'HTZ.R', 'XPDIU', 'DVAX', 'VABK', 'SUNE','SPY'] # only relevant if prototype_flag is true 
+  # num_workers: 2 # Number of parallel processes to run
+  # verbose: 0
+  # prototype_flag: 0
+
+
+
+
+
