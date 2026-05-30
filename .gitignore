@@ -1,0 +1,38 @@
+# Visual Studio Code
+.vscode/
+
+# Build artifacts
+dist/
+build/
+*.o
+*.a
+*.lib
+
+# Node.js
+# This is a common entry for JavaScript/Node.js projects
+node_modules/
+
+# Python
+# Commonly ignored files and folders for Python projects
+__pycache__/
+*.pyc
+.env
+venv/
+
+# Project-specific files
+# Folders you want to exclude from the repository
+data/
+old/
+logs/
+Output Folder/
+
+# Log files
+*.log
+
+# Operating System files
+.DS_Store
+Thumbs.db
+
+# Sensitive information
+# Never commit your .env file or other files containing secrets!
+# .env

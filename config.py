@@ -1,0 +1,16 @@
+QUANDL_TOKEN = "-WJmnks4XxQFZk42d2qK"
+FRED_TOKEN = "e2391158bc158295fe9b4b188c1ff273"
+FINNHUB_TOKEN = "c6smcriad3ie4g2fkcig"
+TIINGO_TOKEN = "b2222ae533f291615d82ae9be7a80fcf4f9e5f0a"
+Alpha_Vantage_TOKEN  ="8U1Q4WM36CO67OG6"
+Financial_Modeling_Prep_TOKEN="184e951655bd841b01680b2e915e4d89"
+
+
+NASDAQ_EMAIL = "nyanpaingtin@gmail.com"
+NASDAQ_PASSWORD = "4!b&M6$4ee^z"
+
+
+"""
+TD api client_id
+"""
+client_id = "O3GJXSALHX8WVS8CNJFKZYK7LCIUVIBP"
