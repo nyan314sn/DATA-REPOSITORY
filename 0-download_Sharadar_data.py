@@ -181,34 +181,93 @@ def setup_driver(download_path):
 
 
 
+# The login form lives inside open shadow roots of nef-* web components
+# (Nasdaq's v5 design system), so plain CSS selectors can't reach it. All
+# lookups go through this JS helper, which recursively pierces shadow roots.
+SHADOW_FIND_JS = """
+function findAll(root, pred, out) {
+  for (const el of root.querySelectorAll('*')) {
+    if (pred(el)) out.push(el);
+    if (el.shadowRoot) findAll(el.shadowRoot, pred, out);
+  }
+  return out;
+}
+"""
+
+
+def _shadow_fill_input(driver, name, value):
+    """Set a value on an <input name=...> inside shadow DOM. Uses the native
+    value setter + input/change events so the page framework notices the
+    change (the 'Next' button stays disabled otherwise)."""
+    return driver.execute_script(SHADOW_FIND_JS + """
+      const name = arguments[0], value = arguments[1];
+      const hits = findAll(document, el => el.tagName === 'INPUT' && el.name === name, []);
+      if (!hits.length) return false;
+      const el = hits[0];
+      el.focus();
+      const set = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+      set.call(el, value);
+      el.dispatchEvent(new Event('input', {bubbles: true, composed: true}));
+      el.dispatchEvent(new Event('change', {bubbles: true, composed: true}));
+      return true;
+    """, name, value)
+
+
+def _shadow_click_button(driver, label):
+    """Click the <button> inside the nef-button component whose slotted text
+    matches label. Returns False while absent or still disabled."""
+    return driver.execute_script(SHADOW_FIND_JS + """
+      const want = arguments[0].toLowerCase();
+      const hosts = findAll(document, el => el.tagName.toLowerCase() === 'nef-button', []);
+      for (const h of hosts) {
+        if ((h.innerText || h.textContent || '').trim().toLowerCase() === want) {
+          const btn = h.shadowRoot && h.shadowRoot.querySelector('button');
+          if (btn && !btn.disabled) { btn.click(); return true; }
+          return false;
+        }
+      }
+      return false;
+    """, label)
+
+
+def _wait_for(action, timeout=20, poll=0.5, desc=""):
+    """Poll a callable until it returns truthy or timeout (seconds) expires."""
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        result = action()
+        if result:
+            return result
+        time.sleep(poll)
+    raise TimeoutException(f"Timed out after {timeout}s waiting for: {desc}")
+
+
 def perform_login(driver, wait):
-    """Handles the entire login process."""
+    """Handles the entire login process (email -> Next -> password -> Login)."""
     print(f"Navigating to login page: {LOGIN_URL}")
     driver.get(LOGIN_URL)
     print("Waiting for page's JavaScript to render the form...")
-    time.sleep(3)
-    try:
-        cookie_button = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-testid='privacy-banner-accept']")))
-        cookie_button.click()
-        print("Cookie consent dismissed.")
-    except TimeoutException:
-        print("Cookie consent banner not found or already dismissed.")
+
     print("Finding email field...")
-    email_input = wait.until(EC.visibility_of_element_located((By.CSS_SELECTOR, "input[data-testid='loginForm_email']")))
-    print("Typing email address...")
-    email_input.send_keys(EMAIL)
-    print("Waiting for 'NEXT' button to become clickable...")
-    next_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-testid='loginForm_next']")))
-    print("Clicking 'NEXT'...")
-    next_button.click()
+    _wait_for(lambda: _shadow_fill_input(driver, "email", EMAIL), desc="email input")
+    print("Email address entered.")
+
+    if _shadow_click_button(driver, "okay"):
+        print("Cookie consent dismissed.")
+
+    print("Clicking 'Next'...")
+    _wait_for(lambda: _shadow_click_button(driver, "next"), desc="'Next' button")
+
     print("Waiting for password field to appear...")
-    password_input = wait.until(EC.visibility_of_element_located((By.ID, "password")))
-    print("Entering password...")
-    password_input.send_keys(PASSWORD)
-    print("Waiting for final 'Login' button...")
-    login_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[data-testid='loginForm_submit']")))
+    _wait_for(lambda: _shadow_fill_input(driver, "password", PASSWORD), desc="password input")
+    print("Password entered.")
+
     print("Clicking final 'Login' button...")
-    login_button.click()
+    _wait_for(lambda: _shadow_click_button(driver, "login")
+              or _shadow_click_button(driver, "log in"), desc="'Login' button")
+
+    print("Waiting for login to complete...")
+    _wait_for(lambda: "/login" not in driver.current_url, timeout=30,
+              desc="redirect away from login page (check credentials if this fails)")
     print("✅ Login submitted successfully!")
     time.sleep(5)
 
