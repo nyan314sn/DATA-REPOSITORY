@@ -3,7 +3,8 @@ REM This batch file activates a specific Conda environment and runs a Python scr
 
 REM --- Configuration ---
 SET CONDA_ENV_NAME=nyan_investment_env
-SET PYTHON_SCRIPT_PATH="0-download_Sharadar_data.py"
+REM API-based downloader (no browser). Fallback: "0-download_Sharadar_data.py"
+SET PYTHON_SCRIPT_PATH="0-download_Sharadar_data_api.py"
 
 REM --- Execution ---
 echo Activating Conda environment: %CONDA_ENV_NAME%...

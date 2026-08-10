@@ -14,7 +14,8 @@ if [ $? -ne 0 ]; then
 fi
 
 # --- Run Scripts ---
-python -u "0-download_Sharadar_data.py"
+# API-based downloader (no browser). Fallback: "0-download_Sharadar_data.py"
+python -u "0-download_Sharadar_data_api.py"
 
 
 

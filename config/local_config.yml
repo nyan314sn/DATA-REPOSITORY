@@ -27,6 +27,7 @@ input_path: "Input Folder/"
   RETRY_WAIT_SECONDS: 60
   TOTAL_DOWNLOAD_TIMEOUT_MINS: 30
   CHECK_INTERVAL_MINS: 10
+  FRESH_WAIT_MINS: 0   # API script only: minutes to wait for a fully fresh snapshot; 0 = grab latest available immediately (same as website button)
   indicator_file_name: "SHARADAR_INDICATORS_2"
   DOWNLOAD_DATA: true # Set to false to skip web scraping and downloading
   UNZIP_DATA: true    # Set to false to skip unzipping files
