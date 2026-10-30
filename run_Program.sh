@@ -5,7 +5,20 @@ CONDA_ENV_NAME="nyan_investment_env"
 
 # --- Activate Conda ---
 echo "Activating Conda environment: $CONDA_ENV_NAME..."
-source "$(conda info --base)/etc/profile.d/conda.sh"
+# Resolve conda without depending on the caller's PATH: a launcher that runs this script in a
+# NON-interactive shell skips ~/.bashrc (it returns before the conda-init block), so `conda`
+# is not on PATH. Use `conda` on PATH, else $CONDA_EXE, else ~/miniconda3; none -> fail loudly.
+if command -v conda >/dev/null 2>&1; then
+    CONDA_BASE="$(conda info --base)"
+elif [ -n "${CONDA_EXE:-}" ] && [ -x "${CONDA_EXE}" ]; then
+    CONDA_BASE="$("${CONDA_EXE}" info --base)"
+elif [ -x "$HOME/miniconda3/bin/conda" ]; then
+    CONDA_BASE="$HOME/miniconda3"
+else
+    echo "ERROR: conda not found (not on PATH, CONDA_EXE unset, no ~/miniconda3)." >&2
+    exit 1
+fi
+source "${CONDA_BASE}/etc/profile.d/conda.sh"
 conda activate "$CONDA_ENV_NAME"
 
 if [ $? -ne 0 ]; then
